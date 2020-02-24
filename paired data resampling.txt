@@ -1,0 +1,51 @@
+' Create list of observed differences, call it diffs
+DATA 10 7.5 5.5 6 9.5 -2.5 13 3 -0.1 0.2 20.3 4 8 25 7.2 35 -3.5 -1.9 0.1 diffs
+
+' compute a relevant statistic from our data and display reslt
+MEDIAN diffs ourresult
+PRINT "The median difference found in our data sample is given on the next line"
+PRINT ourresult
+PRINT " "
+
+'PAUSE
+
+' Create a pot of positive and negative multipliers
+URN -1 1 directions
+
+' a loop between REPEAT and END which does resampling 10000 times
+REPEAT 10000
+  'this next bit does randomisation resampling
+  SAMPLE 19 directions signs     ' Create a random list of + and - signs
+  MULTIPLY signs diffs sample    ' Make each difference + or - at random
+  MEDIAN sample med              ' Median difference for this sample
+  SCORE med scoreboard           ' Add to scoreboard for displaying a histogram later
+
+  'this next bit does bootstrapping resampling
+  SAMPLE 19 diffs newsample	   ' Sample with replacement
+  MEDIAN newsample med2           ' Median difference for this sample
+  SCORE med2 scoreboard2	   ' Add to next scoreboard
+END
+
+'evaluate randomisation results
+HISTOGRAM scoreboard
+MULTIPLY ourresult -1 ourlowtail
+COUNT scoreboard <=ourlowtail less        
+COUNT scoreboard >=ourresult more         
+ADD less more total               ' Total instances median bigger than (or equal to) observed
+DIVIDE total 10000 prob           ' Convert to 2-tailed probability
+PRINT "The probability obtained by randomisation is given on the next line"
+PRINT prob
+
+'PAUSE
+
+'evaluate bootstraping results
+HISTOGRAM scoreboard2
+PERCENTILE scoreboard2 (2.5 97.5) ConfInterval95
+PRINT ConfInterval95
+TAKE ConfInterval95 1 lowLim
+TAKE ConfInterval95 2 hiLim
+OUTPUT "Conclusion: A zero median difference is "
+IF 0 notbetween lowLim hiLim
+   OUTPUT " NOT"
+END
+OUTPUT " within 95% confidence limits.\n"

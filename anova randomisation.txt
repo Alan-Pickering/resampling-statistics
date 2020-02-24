@@ -1,0 +1,63 @@
+'Adapted from Statistics the Easy Way", by Downing and Clark, p.224, problem 15.
+'Perform an analysis-of-variance test to see if the following
+'sets of 11 numbers were selected from distributions with the same mean:
+
+DATA (18  9 15 10 16  8  7 20 13  8 12) group1
+DATA (17 13  9  8 10 13 16 17 12 11 17) group2
+DATA (15 13 13 14 15 20 15 14  9 16 12) group3
+DATA (16 12 13 12 14 11  8 13 17 15 14) group4
+COPY group1 group2 group3 group4 alldata
+MEAN alldata alldataMean
+MEAN group1 group1Mean
+MEAN group2 group2Mean
+MEAN group3 group3Mean
+MEAN group4 group4Mean
+COPY group1Mean group2Mean group3Mean group4Mean groupMeans
+SUMSQRDEV groupMeans alldataMean groupSumsqrdev  ' this statistic is the sum of the squared deviations
+                                                 ' between the sample means and the grand mean
+                                                 ' the bigger this value the more likely there are some real differences amongst the 4 means
+
+PRINT "Computed test statistic -- Sum of Squared deviations of sample means from group mean" groupSumSqrDev
+
+'PAUSE
+ 
+'Now, create a distribution based on the null hypothesis.
+'(NOTE: This is not an ANOVA computation. It is a
+'demonstration of a simulation approach to solving a
+'problem that would normally be solved using ANOVA.)
+
+COPY 1000 numberOfTrials
+COPY 11 ss  ' ss=sampleSize
+
+'do the resampling in the loop below
+REPEAT numberOfTrials
+   SHUFFLE alldata shuffdata              ' the key command which shuffles the 44 data points
+                                          ' into an array called shuffdata ie sampling without replacement
+   TAKE shuffdata 1,11 newgroup1          ' takes the first 11 data points in shuffdata and calls it newgroup 1 etc
+   TAKE shuffdata 12,22 newgroup2         ' takes the first 11 data points in shuffdata and calls it newgroup 1 etc
+   TAKE shuffdata 23,33 newgroup3         ' takes the first 11 data points in shuffdata and calls it newgroup 1 etc
+   TAKE shuffdata 34,44 newgroup4         ' takes the first 11 data points in shuffdata and calls it newgroup 1 etc
+   MEAN newgroup1 sample1Mean
+   MEAN newgroup2 sample2Mean
+   MEAN newgroup3 sample3Mean
+   MEAN newgroup4 sample4Mean
+   COPY sample1Mean sample2Mean sample3Mean sample4Mean sampleMeans
+   SUMSQRDEV sampleMeans alldataMean sampleSumSqrDev  ' calculate the same statistic "sum of squared deviations" but on each resampled dataset
+   SCORE sampleSumSqrDev scoreboard                   ' records the values for each resampling into an array called scoreboard
+END
+
+
+'now evauate the results of the randomisation
+HISTOGRAM scoreboard
+COUNT scoreboard > groupSumsqrdev biggervals
+prob = biggervals / numberOfTrials
+print " "
+print " "
+print "Randomization probability of a value this big under H0" prob
+PERCENTILE scoreboard (95) nullHypothesisAcceptanceInterval  ' note we just inspect one tail of our resampled distribution, as our statistic gets bigger as we reject the null hypothesis
+PRINT "95% critical value of the statistic which must be exceeded in order to sig at 5%" nullHypothesisAcceptanceInterval
+OUTPUT "Conclusion: all groups are"
+IF groupSumsqrdev > nullHypothesisAcceptanceInterval
+   OUTPUT " NOT"
+END
+OUTPUT " from same population within 5% acceptance level.\n"
