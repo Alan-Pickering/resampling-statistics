@@ -9,6 +9,8 @@ It can be downloaded from here:-
 
 http://www.statistics101.net/
 
-All these scripts accompany the You Tube lectures that can be viewed here:
-
+All these scripts accompany the You Tube lectures that can be viewed in my You Tube channel
 https://www.youtube.com/channel/UC8-IAMDbKdJAh0ZPNd4FsVg
+
+they are all gathered together in a playlist here:-
+https://www.youtube.com/playlist?list=PLWW0WMq4Kha5hGufm-5yx83a68ujzASx7
